@@ -8,6 +8,6 @@ import (
 
 func main() {
   http.HandleFunc("/echo", Backend_Challenge.Echo)
-
+  http.HandleFunc("/invert", Backend_Challenge.Invert)
   log.Fatal(http.ListenAndServe(":8080", nil))
 }
