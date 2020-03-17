@@ -3,6 +3,7 @@ package Backend_Challenge
 import (
   "encoding/csv"
   "fmt"
+  "math"
   "net/http"
 )
 
@@ -24,19 +25,18 @@ func Invert(w http.ResponseWriter, r *http.Request) {
     return
   }
 
+  recordsCount := math.Pow(float64(len(records)), 2)
   var response string
-  colIndex, rowIndex := 0, 0
-  for colIndex < 3 {
-    response += records[rowIndex][colIndex]
-    if rowIndex < 2 {
-      response += ","
+  for i := float64(0); i < recordsCount; {
+    separator := ","
+    colIndex := int(math.Floor(i / 3))
+    rowIndex := int(i) % len(records)
+    if rowIndex == len(records) -1 {
+      separator = "\n"
     }
-    rowIndex += 1
-    if rowIndex >= 3 {
-      response += "\n"
-      colIndex += 1
-      rowIndex = 0
-    }
+    item := records[rowIndex][colIndex]
+    response = fmt.Sprintf("%s%s%s", response, item, separator)
+    i += 1
   }
 
   fmt.Fprint(w, response)
