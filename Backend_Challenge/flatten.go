@@ -1,29 +1,11 @@
 package Backend_Challenge
 
 import (
-  "encoding/csv"
   "fmt"
-  "net/http"
   "strings"
 )
 
-func Flatten(w http.ResponseWriter, r *http.Request) {
-  if r.Method != http.MethodPost {
-    w.WriteHeader(http.StatusMethodNotAllowed)
-    return
-  }
-  file, _, err := r.FormFile("file")
-
-  if err != nil {
-    w.Write([]byte(fmt.Sprintf("error %s", err.Error())))
-    return
-  }
-  defer file.Close()
-  records, err := csv.NewReader(file).ReadAll()
-  if err != nil {
-    w.Write([]byte(fmt.Sprintf("error %s", err.Error())))
-    return
-  }
+func Flatten(records [][]string) string {
   var response string
   for index, row := range records {
     separator := ","
@@ -32,5 +14,5 @@ func Flatten(w http.ResponseWriter, r *http.Request) {
     }
     response = fmt.Sprintf("%s%s%s", response, strings.Join(row, ","), separator)
   }
-  fmt.Fprint(w, response)
+  return response
 }
