@@ -7,25 +7,43 @@ import (
   "league.com/challenge/Backend_Challenge"
   "log"
   "net/http"
+  "strings"
 )
+
+func ParseFile(r *http.Request) (records [][]string, err error) {
+  file, fileHeader, err := r.FormFile("file")
+  // Validate file
+  if file == nil {
+    return nil, errors.New("A CSV File is required")
+  }
+  if err != nil {
+    return nil, err
+  }
+  defer file.Close()
+  fileNames := strings.Split(fileHeader.Filename, ".")
+  fileExtension := strings.ToLower(fileNames[len(fileNames) -1])
+  // Validate file format
+  if fileExtension != "csv" {
+    return nil, errors.New("A CSV File is required")
+  }
+
+  return csv.NewReader(file).ReadAll()
+}
 
 func Handle(manipulatorFn func([][]string) string) http.Handler {
   return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    // Allow only POST request as we are accepting a file
     if r.Method != http.MethodPost {
       w.WriteHeader(http.StatusMethodNotAllowed)
+      w.Write([]byte("Method not Allowed"))
       return
     }
-    file, _, err := r.FormFile("file")
-    if file == nil {
-      err = errors.New("File is required")
-    }
+    records, err := ParseFile(r)
     if err != nil {
       w.WriteHeader(http.StatusUnprocessableEntity)
       w.Write([]byte(fmt.Sprintf("error %s", err.Error())))
       return
     }
-    defer file.Close()
-    records, err := csv.NewReader(file).ReadAll()
     w.Write([]byte(manipulatorFn(records)))
   })
 }
