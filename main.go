@@ -10,6 +10,8 @@ import (
   "strings"
 )
 
+// Parse csv file form request and validate file
+// Returns csv content or error
 func ParseFile(r *http.Request) (records [][]string, err error) {
   file, fileHeader, err := r.FormFile("file")
   // Validate file
@@ -30,6 +32,7 @@ func ParseFile(r *http.Request) (records [][]string, err error) {
   return csv.NewReader(file).ReadAll()
 }
 
+// Returns Request handler that execute given function
 func Handle(manipulatorFn func([][]string) string) http.Handler {
   return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
     // Allow only POST request as we are accepting a file
